@@ -1,0 +1,11 @@
+{
+  "name": "regression",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "@playwright/test": "^1.44.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.4.2"
+  }
+}

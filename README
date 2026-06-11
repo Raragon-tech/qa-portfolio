@@ -1,0 +1,235 @@
+# Playwright Test Automation Framework
+
+This project is a **Playwright-based end-to-end test automation framework** designed to validate and verify real-world user workflows, including user registration, authentication, profile management, and navigation.
+
+The framework emphasizes maintainability, scalability, and readability through the use of:
+- Page Object Model (POM)
+- Fixtures for reusable setup
+- A dynamic test data factory for data generation
+- External system integration (Mailinator)
+- Session persistence using `storageState`
+
+# Getting Started
+
+# Install dependencies
+- Node.js 18+
+- Playwright (installed via npm install)
+- Internet access to mailinator.com
+- VS Code (recommended, but not required)
+
+---
+
+# Running Tests:
+
+```bash
+npx playwright test
+```
+
+---
+
+# Features
+
+- Full end-to-end user lifecycle testing  
+- Dynamic test data generation  
+- Email verification using Mailinator  
+- Multi-tab handling  
+- Reusable authentication setup  
+- Clean and scalable test structure  
+- Utilizes ESM
+
+---
+
+# Project Structure
+```text
+├── auth/
+│   ├── existing-user.json     
+│   └── newUser.json           
+├── Factories/
+│   └── userCreation.factory.mjs
+├── Fixtures/
+│   └── baseHomeTest.mjs        
+├── Helpers/
+│   ├── homeNavHelper.mjs
+│   ├── updatePassword.mjs
+│   └── updateUsername.mjs
+├── Pages/
+│   ├── Homepage/
+│   │   ├── Alerts/
+│   │   │   ├── announcements.mjs
+│   │   │   └── notifications.mjs
+│   │   ├── DashboardPages/
+│   │   │   ├── awards.mjs
+│   │   │   ├── classes.mjs
+│   │   │   ├── community.mjs
+│   │   │   ├── help.mjs
+│   │   │   ├── learning.mjs
+│   │   │   └── store.mjs
+│   │   ├── ProfileMenuOptions/
+│   │   │   ├── contactUs.mjs
+│   │   │   ├── profile.mjs
+│   │   │   └── statistics.mjs
+│   │   ├── homepagePage.mjs
+│   │   └── homeSearch.mjs
+│   ├── Login/
+│   │   └── login.mjs
+│   ├── Registration/
+│   │   ├── mailinator.mjs
+│   │   ├── passwordCreation.mjs
+│   │   └── register.mjs
+├── Tests/
+│   ├── Homepage/
+│   │   ├── alerts.spec.mjs
+│   │   ├── dashBarNavigation.spec.mjs
+│   │   ├── profileOptions.spec.mjs
+│   │   └── search.spec.mjs
+│   ├── Login/
+│   │   └── invalidLogin.spec.mjs
+│   ├── Profile/
+│   │   └── profile.spec.mjs
+│   ├── Registration/
+│   │   └── newRegistration.spec.mjs
+│   ├── Setup/
+│   │   └── login.setup.mjs
+├── playwright.config.js
+└── README
+```
+# Framework Flow
+
+```mermaid
+graph TD
+    Test -->|uses| Fixture
+    Fixture -->|initializes| PageObjects
+    PageObjects -->|use| Helpers
+    Test -->|generates data via| Factory
+    Test -->|integrates with| Mailinator
+```
+---
+# Framework Design
+
+## Page Object Model (POM)
+Each page encapsulates:
+- Locators
+- Actions
+- Assertions
+
+Example:
+```js
+await homepage.goToProfile();
+await profilePage.verifyProfileLoaded();
+```
+
+# Fixture
+The fixture provides reusable setup and pre-configured test state.
+
+Example:
+```js
+test('...', async ({ homepage }) => {
+```
+
+The homepage fixture:
+- Navigates to the app
+- Returns a ready-to-use Page Object
+
+# Factory
+The factory generates dynamic and unique test users.
+
+Example:
+```js
+{
+  newUsername: "edu123456",
+  newEmail: "edu123456@mailinator.com",
+  newPassword: "Password123!"
+}
+```
+# Authentication Strategy
+The auth files store session states to use in various projects to reuse
+
+Example:
+```js
+await context.storageState({
+  path: 'auth/existing-user.json',
+});
+```
+
+This approach enables:
+- Faster test execution
+- Reuse of authenticated sessions across tests
+- Customized user states for specific tests. For example, new vs. existing users, or users with different roles.
+
+
+# Email Verification (Mailinator Integration)
+
+ Example:
+ ```js
+await mailinator.openInboxByUsername(user.newUsername);
+await mailinator.openActivationEmail(user.newEmail);
+const activationPage = await mailinator.clickActivationLink();
+```
+
+This process handles:
+- Inbox scoping
+- Email selection
+- Iframe interaction
+- New tab navigation
+
+---
+
+# End-to-End User Flow
+
+# Registration 
+- Open login page
+- Navigate to registration
+- Submit new user details
+- Open Mailinator inbox
+- Activate account via email
+- Set password (new tab)
+- Verify first login
+- Save credentials for reuse
+
+# Profile Management
+- Navigate to Profile of a stored user session
+- Update profile details
+- Change username (with revert)
+- Change password (with revert)
+- Validate UI elements (groups & qualifications)
+- Error handling for nonvisible elements and unsuccessful updates
+
+# Negative Tests
+- Invalid username
+- Invalid password
+
+Example:
+```js
+await login.verifyInvalidLoginError();
+```
+
+---
+
+# Test Structure:
+Arrange → Act → Assert
+
+# Reusability
+- Page methods are reused across tests
+- Login sessions are reused before each test begins
+- Dynamic data generation
+
+# Stability
+- Explicit waits using expect()
+- Handling optional UI (toasts, modals)
+- Cleanup actions (closing tabs, reverting data)
+
+
+# Highlights
+- Real-world workflow automation
+- Multi-system integration (App + Email)
+- Clean, maintainable architecture
+- Advanced Playwright usage (fixtures, storageState, multi-tab)
+
+
+# Why This Framework?
+This framework is designed to:
+- Reduce test flakiness through controlled state management
+- Enable parallel execution safely
+- Support non-technical QA onboarding through clear structure
+- Validate real user workflows, not just isolated UI components
+- Account for unique quirks that can exist in applications
